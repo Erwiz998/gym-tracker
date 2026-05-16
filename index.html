@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymTrack">
+<title>GymTrack</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --bg4: #222222;
+    --border: #2a2a2a;
+    --text: #f0f0f0;
+    --text2: #888888;
+    --text3: #555555;
+    --accent: #e8ff00;
+    --accent2: #b8cc00;
+    --red: #ff4444;
+    --green: #44ff88;
+    --orange: #ff8c00;
+    --radius: 12px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    height: 100%;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── APP SHELL ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* ── VIEWS ── */
+  .view {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 calc(72px + var(--safe-bottom)) 0;
+  }
+  .view.active { display: flex; flex-direction: column; }
+
+  /* ── BOTTOM NAV ── */
+  #nav {
+    display: flex;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0 8px;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-family: 'Barlow', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-btn.active { color: var(--accent); }
+
+  /* ── HEADER ── */
+  .page-header {
+    padding: 20px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  .page-title span { color: var(--accent); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-active: brightness(0.85);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:active { background: var(--accent2); }
+  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: rgba(255,68,68,0.15); color: var(--red); border: 1px solid rgba(255,68,68,0.3); }
+  .btn-ghost { background: none; color: var(--text2); border: 1px solid var(--border); }
+  .btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+  .btn-icon { padding: 10px; border-radius: 10px; }
+  .btn-full { width: 100%; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  /* ══════════════════════════════════
+     HOME VIEW
+  ══════════════════════════════════ */
+  #view-home {
+    gap: 0;
+  }
+  .home-hero {
+    padding: 24px 20px 20px;
+    background: var(--bg);
+  }
+  .home-greeting {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .home-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+  }
+  .home-title .accent { color: var(--accent); }
+
+  .home-section { padding: 20px 20px 0; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  .program-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 10px;
+  }
+  .program-card:active { background: var(--bg3); border-color: var(--accent); }
+  .program-day-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .program-day-badge .day-word { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; }
+  .program-day-badge .day-num { font-size: 22px; }
+  .program-card-info { flex: 1 }
+  .program-card-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+  .program-card-sub { font-size: 12px; color: var(--text2); }
+  .program-card-arrow { color: var(--text3); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-box-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-box-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  /* ══════════════════════════════════
+     WORKOUT VIEW (active session)
+  ══════════════════════════════════ */
+  .session-header {
+    padding: 16px 20px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+  .session-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .session-day-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .session-timer {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .session-progress-bar {
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .session-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .exercise-block {
+    margin: 12px 20px 0;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .exercise-block.completed { border-color: rgba(68,255,136,0.3); }
+
+  .exercise-block-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .exercise-block-header.collapsed ~ .exercise-sets { display: none; }
+
+  .ex-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .ex-name { font-weight: 700; font-size: 14px; flex: 1; }
+  .ex-progress { font-size: 12px; color: var(--text2); }
+  .ex-done-badge {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .exercise-sets { padding: 0 16px 14px; }
+
+  .set-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 1fr 48px;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+  }
+  .set-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text3);
+    text-align: center;
+  }
+  .set-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px 6px;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+  .set-input:focus { outline: none; border-color: var(--accent); }
+  .set-input-label { font-size: 9px; color: var(--text3); text-align: center; margin-top: 2px; }
+  .set-input-wrap { display: flex; flex-direction: column; }
+
+  .set-check {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .set-check.done {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .set-check.done svg { color: #000; }
+  .set-check svg { width: 20px; height: 20px; color: var(--text3); }
+
+  .finish-btn-wrap {
+    padding: 20px;
+  }
+
+  /* ══════════════════════════════════
+     EXERCISES VIEW
+  ══════════════════════════════════ */
+  .exercise-list-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .exercise-list-item:active { background: var(--bg2); }
+  .ex-list-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--bg3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ex-list-info { flex: 1; }
+  .ex-list-name { font-weight: 600; font-size: 15px; }
+  .ex-list-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .ex-list-arrow { color: var(--text3); }
+
+  .fab {
+    position: fixed;
+    bottom: calc(80px + var(--safe-bottom));
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(232,255,0,0.3);
+    z-index: 50;
+    transition: transform 0.15s;
+  }
+  .fab:active { transform: scale(0.93); }
+  .fab svg { width: 24px; height: 24px; }
+
+  /* ══════════════════════════════════
+     HISTORY VIEW
+  ══════════════════════════════════ */
+  .history-item {
+    margin: 12px 20px 0;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .history-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .history-item-day {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .history-item-date { font-size: 12px; color: var(--text2); }
+  .history-item-stats { display: flex; gap: 16px; }
+  .history-stat { text-align: center; }
+  .history-stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .history-stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .history-exercises { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .history-ex-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; color: var(--text2); }
+  .history-ex-row span:first-child { color: var(--text); }
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 40px 20px; text-align: center;
+  }
+  .empty-icon { font-size: 48px; }
+  .empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; }
+  .empty-sub { font-size: 14px; color: var(--text2); max-width: 240px; line-height: 1.5; }
+
+  /* ══════════════════════════════════
+     MODALS
+  ══════════════════════════════════ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-sheet {
+    background: var(--bg2);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px calc(20px + var(--safe-bottom));
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    border-top: 1px solid var(--border);
+  }
+  .modal-overlay.open .modal-sheet { transform: translateY(0); }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; display: block; }
+  .form-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+  .form-input:focus { outline: none; border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ══════════════════════════════════
+     REST TIMER OVERLAY
+  ══════════════════════════════════ */
+  #rest-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  #rest-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .rest-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+  .rest-ring {
+    position: relative;
+    width: 220px;
+    height: 220px;
+  }
+  .rest-ring svg {
+    width: 220px;
+    height: 220px;
+    transform: rotate(-90deg);
+  }
+  .rest-ring-bg { fill: none; stroke: var(--bg3); stroke-width: 8; }
+  .rest-ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .rest-time {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .rest-seconds {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .rest-sub { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 2px; }
+  .rest-actions { display: flex; gap: 12px; }
+
+  /* ══════════════════════════════════
+     MISC
+  ══════════════════════════════════ */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .chip-green { background: rgba(68,255,136,0.15); color: var(--green); }
+  .chip-yellow { background: rgba(232,255,0,0.15); color: var(--accent); }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 20px; }
+
+  .no-session-banner {
+    margin: 12px 20px 0;
+    background: linear-gradient(135deg, rgba(232,255,0,0.08), rgba(232,255,0,0.03));
+    border: 1px solid rgba(232,255,0,0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .no-session-banner h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .no-session-banner p { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ HOME ══ -->
+  <div class="view active" id="view-home">
+    <div class="home-hero">
+      <div class="home-greeting">Ready to train?</div>
+      <div class="home-title">GYM<span class="accent">TRACK</span></div>
+    </div>
+
+    <div class="home-section" style="margin-top:20px;">
+      <div class="section-label">Your Stats</div>
+      <div class="stats-row" id="home-stats">
+        <div class="stat-box">
+          <div class="stat-box-num" id="stat-sessions">0</div>
+          <div class="stat-box-label">Sessions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-num" id="stat-sets">0</div>
+          <div class="stat-box-label">Total Sets</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-num" id="stat-vol">0</div>
+          <div class="stat-box-label">kg Lifted</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-section">
+      <div class="section-label">Quick Start</div>
+      <div id="quick-start-cards"></div>
+    </div>
+
+    <div class="home-section" style="margin-top:4px; padding-bottom:20px;">
+      <div class="section-label">Custom Workout</div>
+      <button class="btn btn-secondary btn-full" onclick="startCustomSession()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Start Empty Session
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ WORKOUT ══ -->
+  <div class="view" id="view-workout">
+    <div class="session-header" id="session-header">
+      <div class="session-meta">
+        <div class="session-day-label" id="session-day-label">Session</div>
+        <div class="session-timer" id="session-timer">0:00</div>
+      </div>
+      <div class="session-progress-bar">
+        <div class="session-progress-fill" id="session-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div id="session-exercises"></div>
+    <div class="finish-btn-wrap">
+      <button class="btn btn-primary btn-full" onclick="finishSession()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        Finish Workout
+      </button>
+    </div>
+    <div id="no-session-view" style="display:none; padding:20px;">
+      <div class="no-session-banner">
+        <h3>No Active Session</h3>
+        <p>Go to Home to start a workout</p>
+        <button class="btn btn-primary" onclick="goTo('home')">Go to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EXERCISES ══ -->
+  <div class="view" id="view-exercises">
+    <div class="page-header">
+      <div class="page-title">EXERCI<span>SES</span></div>
+      <button class="btn btn-primary btn-sm" onclick="openAddExerciseModal()">+ Add</button>
+    </div>
+    <div id="exercise-list"></div>
+  </div>
+
+  <!-- ══ HISTORY ══ -->
+  <div class="view" id="view-history">
+    <div class="page-header">
+      <div class="page-title">HISTO<span>RY</span></div>
+    </div>
+    <div id="history-list"></div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav id="nav">
+    <button class="nav-btn active" onclick="goTo('home')" id="nav-home">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.5 1.5 0 012.092 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+      Home
+    </button>
+    <button class="nav-btn" onclick="goTo('workout')" id="nav-workout">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+      Workout
+    </button>
+    <button class="nav-btn" onclick="goTo('exercises')" id="nav-exercises">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      Exercises
+    </button>
+    <button class="nav-btn" onclick="goTo('history')" id="nav-history">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      History
+    </button>
+  </nav>
+</div>
+
+<!-- ══ REST TIMER OVERLAY ══ -->
+<div id="rest-overlay">
+  <div class="rest-label">Rest Time</div>
+  <div class="rest-ring">
+    <svg viewBox="0 0 220 220">
+      <circle class="rest-ring-bg" cx="110" cy="110" r="97"/>
+      <circle class="rest-ring-fill" id="rest-ring-fill" cx="110" cy="110" r="97"
+        stroke-dasharray="609.7" stroke-dashoffset="0"/>
+    </svg>
+    <div class="rest-time">
+      <div class="rest-seconds" id="rest-seconds">90</div>
+      <div class="rest-sub">seconds</div>
+    </div>
+  </div>
+  <div class="rest-actions">
+    <button class="btn btn-ghost btn-sm" onclick="addRestTime(-15)">-15s</button>
+    <button class="btn btn-primary" onclick="skipRest()">Skip Rest</button>
+    <button class="btn btn-ghost btn-sm" onclick="addRestTime(+30)">+30s</button>
+  </div>
+</div>
+
+<!-- ══ ADD EXERCISE MODAL ══ -->
+<div class="modal-overlay" id="modal-exercise" onclick="closeModalOnBg(event,'modal-exercise')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-exercise-title">New Exercise</div>
+    <div class="form-group">
+      <label class="form-label">Exercise Name</label>
+      <input class="form-input" type="text" id="ex-form-name" placeholder="e.g. Barbell Squat">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Default Sets</label>
+        <input class="form-input" type="number" id="ex-form-sets" placeholder="4" min="1" max="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Default Reps</label>
+        <input class="form-input" type="number" id="ex-form-reps" placeholder="10" min="1" max="100">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Default Weight (kg)</label>
+        <input class="form-input" type="number" id="ex-form-weight" placeholder="60" min="0" step="0.5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rest Time (sec)</label>
+        <input class="form-input" type="number" id="ex-form-rest" placeholder="90" min="0" max="600">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji Icon</label>
+      <input class="form-input" type="text" id="ex-form-icon" placeholder="💪" maxlength="2">
+    </div>
+    <input type="hidden" id="ex-form-id">
+    <button class="btn btn-primary btn-full" onclick="saveExercise()">Save Exercise</button>
+  </div>
+</div>
+
+<!-- ══ ADD TO SESSION MODAL ══ -->
+<div class="modal-overlay" id="modal-add-to-session" onclick="closeModalOnBg(event,'modal-add-to-session')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add to Session</div>
+    <div id="add-to-session-list"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// DATA LAYER
+// ════════════════════════════════════════
+
+const DB_KEY = 'gymtrack_v1';
+
+function loadDB() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB(); }
+  catch { return defaultDB(); }
+}
+
+function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+function defaultDB() {
+  return {
+    exercises: defaultExercises(),
+    sessions: [],
+    activeSession: null
+  };
+}
+
+function defaultExercises() {
+  return [
+    // Day 1
+    { id: 'e1', name: 'Rope Overhead Triceps Extension', sets: 4, reps: 10, weight: 15, rest: 90, icon: '💪', group: 'Day 1' },
+    { id: 'e2', name: 'Machine Tricep Pushdown', sets: 4, reps: 12, weight: 25, rest: 90, icon: '💪', group: 'Day 1' },
+    { id: 'e3', name: 'Leg Press (Quad Focus)', sets: 4, reps: 10, weight: 100, rest: 120, icon: '🦵', group: 'Day 1' },
+    { id: 'e4', name: 'Lat Pulldown', sets: 3, reps: 8, weight: 30, rest: 90, icon: '🏋️', group: 'Day 1' },
+    { id: 'e5', name: 'Seated Cable Row', sets: 4, reps: 10, weight: 30, rest: 90, icon: '🏋️', group: 'Day 1' },
+    { id: 'e6', name: 'Dumbbell Side Raise', sets: 4, reps: 10, weight: 7.5, rest: 60, icon: '🏋️', group: 'Day 1' },
+    { id: 'e7', name: 'Machine Hammer Curl', sets: 4, reps: 10, weight: 25, rest: 90, icon: '💪', group: 'Day 1' },
+    // Day 2
+    { id: 'e8', name: 'Squat', sets: 4, reps: 10, weight: 40, rest: 120, icon: '🦵', group: 'Day 2' },
+    { id: 'e9', name: 'DB Bench Press', sets: 4, reps: 10, weight: 12.5, rest: 90, icon: '🏋️', group: 'Day 2' },
+    { id: 'e10', name: 'Reverse Fly', sets: 3, reps: 12, weight: 15, rest: 60, icon: '🏋️', group: 'Day 2' },
+    { id: 'e11', name: 'Machine Biceps Curl', sets: 4, reps: 10, weight: 25, rest: 90, icon: '💪', group: 'Day 2' },
+    { id: 'e12', name: 'Calf Raises', sets: 3, reps: 15, weight: 40, rest: 60, icon: '🦵', group: 'Day 2' },
+    { id: 'e13', name: 'Incline Walk Cardio', sets: 1, reps: 1, weight: 0, rest: 0, icon: '🚶', group: 'Day 2' },
+    { id: 'e14', name: 'Leg Curl', sets: 4, reps: 10, weight: 50, rest: 90, icon: '🦵', group: 'Day 2' },
+  ];
+}
+
+let db = loadDB();
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+
+let currentView = 'home';
+
+function goTo(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.getElementById('nav-' + view).classList.add('active');
+  currentView = view;
+  if (view === 'home') renderHome();
+  if (view === 'workout') renderWorkout();
+  if (view === 'exercises') renderExercises();
+  if (view === 'history') renderHistory();
+}
+
+// ════════════════════════════════════════
+// HOME
+// ════════════════════════════════════════
+
+function renderHome() {
+  // Stats
+  const sessions = db.sessions;
+  const totalSets = sessions.reduce((a, s) => a + s.exercises.reduce((b, e) => b + e.sets.filter(x => x.done).length, 0), 0);
+  const totalVol = sessions.reduce((a, s) => a + s.exercises.reduce((b, e) => b + e.sets.filter(x => x.done).reduce((c, x) => c + (parseFloat(x.weight) * parseInt(x.reps) || 0), 0), 0), 0);
+  document.getElementById('stat-sessions').textContent = sessions.length;
+  document.getElementById('stat-sets').textContent = totalSets;
+  document.getElementById('stat-vol').textContent = totalVol >= 1000 ? (totalVol/1000).toFixed(1) + 'k' : Math.round(totalVol);
+
+  // Quick start cards
+  const programs = [
+    { day: 1, label: 'Push / Pull / Legs', exercises: db.exercises.filter(e => e.group === 'Day 1') },
+    { day: 2, label: 'Full Body + Cardio', exercises: db.exercises.filter(e => e.group === 'Day 2') },
+  ];
+  const container = document.getElementById('quick-start-cards');
+  container.innerHTML = programs.map(p => `
+    <div class="program-card" onclick="startProgramSession(${p.day})">
+      <div class="program-day-badge">
+        <span class="day-word">Day</span>
+        <span class="day-num">${p.day}</span>
+      </div>
+      <div class="program-card-info">
+        <div class="program-card-title">${p.label}</div>
+        <div class="program-card-sub">${p.exercises.length} exercises · ${p.exercises.reduce((a,e)=>a+e.sets,0)} total sets</div>
+      </div>
+      <svg class="program-card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════
+// SESSION
+// ════════════════════════════════════════
+
+let sessionTimerInterval = null;
+
+function startProgramSession(day) {
+  if (db.activeSession) {
+    if (!confirm('There\'s already an active session. Start a new one?')) return;
+    clearInterval(sessionTimerInterval);
+  }
+  const exercises = db.exercises.filter(e => e.group === 'Day ' + day).map(e => ({
+    id: e.id,
+    name: e.name,
+    icon: e.icon,
+    rest: e.rest,
+    sets: Array.from({length: e.sets}, (_, i) => ({
+      num: i + 1,
+      weight: e.weight,
+      reps: e.reps,
+      done: false
+    })),
+    collapsed: false,
+    completed: false
+  }));
+  db.activeSession = {
+    dayLabel: 'Day ' + day,
+    startTime: Date.now(),
+    exercises
+  };
+  saveDB();
+  goTo('workout');
+}
+
+function startCustomSession() {
+  if (db.activeSession) {
+    if (!confirm('Clear active session and start fresh?')) return;
+    clearInterval(sessionTimerInterval);
+  }
+  db.activeSession = {
+    dayLabel: 'Custom',
+    startTime: Date.now(),
+    exercises: []
+  };
+  saveDB();
+  goTo('workout');
+  openAddToSessionModal();
+}
+
+function renderWorkout() {
+  clearInterval(sessionTimerInterval);
+  const session = db.activeSession;
+  const wrapEl = document.getElementById('view-workout');
+  const noSessionEl = document.getElementById('no-session-view');
+  const sessionContent = document.getElementById('session-exercises');
+  const sessionHeader = document.getElementById('session-header');
+
+  if (!session) {
+    sessionHeader.style.display = 'none';
+    noSessionEl.style.display = 'block';
+    sessionContent.innerHTML = '';
+    document.querySelector('#view-workout .finish-btn-wrap').style.display = 'none';
+    return;
+  }
+
+  sessionHeader.style.display = 'block';
+  noSessionEl.style.display = 'none';
+  document.querySelector('#view-workout .finish-btn-wrap').style.display = 'block';
+  document.getElementById('session-day-label').textContent = session.dayLabel;
+  updateSessionProgress();
+  startSessionTimer();
+  renderSessionExercises();
+
+  // FAB for adding exercises
+  let fab = document.getElementById('session-fab');
+  if (!fab) {
+    fab = document.createElement('button');
+    fab.id = 'session-fab';
+    fab.className = 'fab';
+    fab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>';
+    fab.onclick = openAddToSessionModal;
+    document.getElementById('app').appendChild(fab);
+  }
+  fab.style.display = currentView === 'workout' ? 'flex' : 'none';
+}
+
+function startSessionTimer() {
+  function update() {
+    if (!db.activeSession) return;
+    const elapsed = Math.floor((Date.now() - db.activeSession.startTime) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const s = elapsed % 60;
+    document.getElementById('session-timer').textContent = m + ':' + String(s).padStart(2,'0');
+  }
+  update();
+  sessionTimerInterval = setInterval(update, 1000);
+}
+
+function updateSessionProgress() {
+  if (!db.activeSession) return;
+  const all = db.activeSession.exercises.flatMap(e => e.sets);
+  const done = all.filter(s => s.done).length;
+  const pct = all.length ? (done / all.length * 100) : 0;
+  document.getElementById('session-progress-fill').style.width = pct + '%';
+}
+
+function renderSessionExercises() {
+  const container = document.getElementById('session-exercises');
+  const session = db.activeSession;
+  if (!session) return;
+
+  if (session.exercises.length === 0) {
+    container.innerHTML = `<div style="padding:40px 20px; text-align:center; color:var(--text2);">
+      <div style="font-size:36px;margin-bottom:12px;">🏋️</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;margin-bottom:8px;">Empty Session</div>
+      <div style="font-size:13px;">Tap + to add exercises</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = session.exercises.map((ex, ei) => {
+    const doneSets = ex.sets.filter(s => s.done).length;
+    const isCompleted = doneSets === ex.sets.length && ex.sets.length > 0;
+    return `
+    <div class="exercise-block ${isCompleted ? 'completed' : ''}" id="ex-block-${ei}">
+      <div class="exercise-block-header ${ex.collapsed ? 'collapsed' : ''}" onclick="toggleExCollapse(${ei})">
+        <div class="ex-icon">${ex.icon || '💪'}</div>
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-progress">${doneSets}/${ex.sets.length}</div>
+        ${isCompleted ? '<div class="ex-done-badge"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="#000" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>' : ''}
+      </div>
+      <div class="exercise-sets" ${ex.collapsed ? 'style="display:none"' : ''}>
+        <div style="display:grid;grid-template-columns:28px 1fr 1fr 48px;gap:8px;padding:4px 0 2px;border-bottom:1px solid var(--border);">
+          <div></div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);text-align:center;">KG</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);text-align:center;">REPS</div>
+          <div></div>
+        </div>
+        ${ex.sets.map((set, si) => `
+        <div class="set-row" id="set-${ei}-${si}">
+          <div class="set-num">${si+1}</div>
+          <div class="set-input-wrap">
+            <input class="set-input ${set.done ? 'set-done-style' : ''}" type="number" value="${set.weight}" min="0" step="0.5"
+              onchange="updateSetValue(${ei},${si},'weight',this.value)"
+              ${set.done ? 'readonly' : ''}>
+          </div>
+          <div class="set-input-wrap">
+            <input class="set-input ${set.done ? 'set-done-style' : ''}" type="number" value="${set.reps}" min="1"
+              onchange="updateSetValue(${ei},${si},'reps',this.value)"
+              ${set.done ? 'readonly' : ''}>
+          </div>
+          <button class="set-check ${set.done ? 'done' : ''}" onclick="toggleSet(${ei},${si})">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          </button>
+        </div>`).join('')}
+        <div style="padding-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="addSetToExercise(${ei})" style="flex:1;">+ Set</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="removeExerciseFromSession(${ei})">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleExCollapse(ei) {
+  db.activeSession.exercises[ei].collapsed = !db.activeSession.exercises[ei].collapsed;
+  saveDB();
+  renderSessionExercises();
+}
+
+function updateSetValue(ei, si, field, val) {
+  db.activeSession.exercises[ei].sets[si][field] = parseFloat(val) || 0;
+  saveDB();
+}
+
+function toggleSet(ei, si) {
+  const set = db.activeSession.exercises[ei].sets[si];
+  set.done = !set.done;
+  saveDB();
+
+  if (set.done) {
+    // Start rest timer
+    const ex = db.activeSession.exercises[ei];
+    const allDone = ex.sets.every(s => s.done);
+    if (allDone) db.activeSession.exercises[ei].completed = true;
+    saveDB();
+    if (ex.rest > 0) startRestTimer(ex.rest);
+  }
+
+  updateSessionProgress();
+  renderSessionExercises();
+}
+
+function addSetToExercise(ei) {
+  const ex = db.activeSession.exercises[ei];
+  const lastSet = ex.sets[ex.sets.length - 1] || { weight: 0, reps: 10 };
+  ex.sets.push({ num: ex.sets.length + 1, weight: lastSet.weight, reps: lastSet.reps, done: false });
+  saveDB();
+  renderSessionExercises();
+}
+
+function removeExerciseFromSession(ei) {
+  db.activeSession.exercises.splice(ei, 1);
+  saveDB();
+  renderSessionExercises();
+  updateSessionProgress();
+}
+
+function finishSession() {
+  if (!db.activeSession) return;
+  const session = db.activeSession;
+  const totalSets = session.exercises.flatMap(e => e.sets).filter(s => s.done).length;
+  if (totalSets === 0 && !confirm('No sets completed. Finish anyway?')) return;
+
+  session.endTime = Date.now();
+  session.duration = Math.floor((session.endTime - session.startTime) / 1000);
+  db.sessions.unshift(session);
+  db.activeSession = null;
+  saveDB();
+  clearInterval(sessionTimerInterval);
+
+  // Remove fab
+  const fab = document.getElementById('session-fab');
+  if (fab) fab.style.display = 'none';
+
+  goTo('history');
+}
+
+// ════════════════════════════════════════
+// REST TIMER
+// ════════════════════════════════════════
+
+let restInterval = null;
+let restRemaining = 0;
+let restTotal = 0;
+const CIRCUMFERENCE = 609.7;
+
+function startRestTimer(seconds) {
+  clearInterval(restInterval);
+  restRemaining = seconds;
+  restTotal = seconds;
+  document.getElementById('rest-overlay').classList.add('active');
+  updateRestDisplay();
+  restInterval = setInterval(() => {
+    restRemaining--;
+    if (restRemaining <= 0) {
+      restRemaining = 0;
+      clearInterval(restInterval);
+      skipRest();
+      // vibrate if supported
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+    updateRestDisplay();
+  }, 1000);
+}
+
+function updateRestDisplay() {
+  document.getElementById('rest-seconds').textContent = restRemaining;
+  const progress = restRemaining / restTotal;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  document.getElementById('rest-ring-fill').style.strokeDashoffset = offset;
+}
+
+function skipRest() {
+  clearInterval(restInterval);
+  document.getElementById('rest-overlay').classList.remove('active');
+}
+
+function addRestTime(delta) {
+  restRemaining = Math.max(0, restRemaining + delta);
+  restTotal = Math.max(restTotal, restRemaining);
+  updateRestDisplay();
+}
+
+// ════════════════════════════════════════
+// EXERCISES
+// ════════════════════════════════════════
+
+function renderExercises() {
+  const list = document.getElementById('exercise-list');
+  const grouped = {};
+  db.exercises.forEach(e => {
+    const g = e.group || 'Custom';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(e);
+  });
+  list.innerHTML = Object.entries(grouped).map(([group, exs]) => `
+    <div style="padding:16px 20px 6px;">
+      <div class="section-label">${group}</div>
+    </div>
+    ${exs.map(e => `
+    <div class="exercise-list-item" onclick="openEditExerciseModal('${e.id}')">
+      <div class="ex-list-icon">${e.icon || '💪'}</div>
+      <div class="ex-list-info">
+        <div class="ex-list-name">${e.name}</div>
+        <div class="ex-list-meta">${e.sets}×${e.reps} · ${e.weight}kg · ${e.rest}s rest</div>
+      </div>
+      <svg class="ex-list-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </div>`).join('')}
+  `).join('');
+}
+
+function openAddExerciseModal() {
+  document.getElementById('modal-exercise-title').textContent = 'New Exercise';
+  document.getElementById('ex-form-id').value = '';
+  document.getElementById('ex-form-name').value = '';
+  document.getElementById('ex-form-sets').value = '4';
+  document.getElementById('ex-form-reps').value = '10';
+  document.getElementById('ex-form-weight').value = '20';
+  document.getElementById('ex-form-rest').value = '90';
+  document.getElementById('ex-form-icon').value = '💪';
+  openModal('modal-exercise');
+}
+
+function openEditExerciseModal(id) {
+  const ex = db.exercises.find(e => e.id === id);
+  if (!ex) return;
+  document.getElementById('modal-exercise-title').textContent = 'Edit Exercise';
+  document.getElementById('ex-form-id').value = ex.id;
+  document.getElementById('ex-form-name').value = ex.name;
+  document.getElementById('ex-form-sets').value = ex.sets;
+  document.getElementById('ex-form-reps').value = ex.reps;
+  document.getElementById('ex-form-weight').value = ex.weight;
+  document.getElementById('ex-form-rest').value = ex.rest;
+  document.getElementById('ex-form-icon').value = ex.icon || '💪';
+  openModal('modal-exercise');
+}
+
+function saveExercise() {
+  const id = document.getElementById('ex-form-id').value;
+  const name = document.getElementById('ex-form-name').value.trim();
+  if (!name) { alert('Enter an exercise name'); return; }
+
+  const data = {
+    name,
+    sets: parseInt(document.getElementById('ex-form-sets').value) || 4,
+    reps: parseInt(document.getElementById('ex-form-reps').value) || 10,
+    weight: parseFloat(document.getElementById('ex-form-weight').value) || 0,
+    rest: parseInt(document.getElementById('ex-form-rest').value) || 90,
+    icon: document.getElementById('ex-form-icon').value || '💪',
+    group: 'Custom'
+  };
+
+  if (id) {
+    const idx = db.exercises.findIndex(e => e.id === id);
+    if (idx !== -1) { db.exercises[idx] = { ...db.exercises[idx], ...data }; }
+  } else {
+    data.id = 'e_' + Date.now();
+    db.exercises.push(data);
+  }
+
+  saveDB();
+  closeModal('modal-exercise');
+  renderExercises();
+}
+
+// ════════════════════════════════════════
+// ADD TO SESSION
+// ════════════════════════════════════════
+
+function openAddToSessionModal() {
+  const list = document.getElementById('add-to-session-list');
+  const grouped = {};
+  db.exercises.forEach(e => {
+    const g = e.group || 'Custom';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(e);
+  });
+  list.innerHTML = Object.entries(grouped).map(([group, exs]) => `
+    <div style="padding:8px 0 4px;">
+      <div class="section-label">${group}</div>
+    </div>
+    ${exs.map(e => `
+    <div class="exercise-list-item" style="padding:12px 0;" onclick="addExToSession('${e.id}')">
+      <div class="ex-list-icon">${e.icon || '💪'}</div>
+      <div class="ex-list-info">
+        <div class="ex-list-name">${e.name}</div>
+        <div class="ex-list-meta">${e.sets}×${e.reps} · ${e.weight}kg</div>
+      </div>
+      <div class="chip chip-yellow">+ Add</div>
+    </div>`).join('')}
+  `).join('');
+  openModal('modal-add-to-session');
+}
+
+function addExToSession(id) {
+  if (!db.activeSession) return;
+  const ex = db.exercises.find(e => e.id === id);
+  if (!ex) return;
+  db.activeSession.exercises.push({
+    id: ex.id,
+    name: ex.name,
+    icon: ex.icon,
+    rest: ex.rest,
+    sets: Array.from({length: ex.sets}, (_, i) => ({
+      num: i+1, weight: ex.weight, reps: ex.reps, done: false
+    })),
+    collapsed: false,
+    completed: false
+  });
+  saveDB();
+  closeModal('modal-add-to-session');
+  renderSessionExercises();
+  updateSessionProgress();
+}
+
+// ════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (db.sessions.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No Workouts Yet</div>
+      <div class="empty-sub">Complete your first session to see your history here</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = db.sessions.map((s, i) => {
+    const date = new Date(s.startTime);
+    const dateStr = date.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
+    const timeStr = date.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    const sets = s.exercises.flatMap(e => e.sets).filter(x => x.done);
+    const volume = sets.reduce((a, x) => a + (parseFloat(x.weight) * parseInt(x.reps) || 0), 0);
+    const durMin = s.duration ? Math.floor(s.duration / 60) : '—';
+
+    return `
+    <div class="history-item">
+      <div class="history-item-header">
+        <div>
+          <div class="history-item-day">${s.dayLabel}</div>
+          <div class="history-item-date">${dateStr} · ${timeStr}</div>
+        </div>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSession(${i})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="history-item-stats">
+        <div class="history-stat">
+          <div class="history-stat-num">${sets.length}</div>
+          <div class="history-stat-label">Sets</div>
+        </div>
+        <div class="history-stat">
+          <div class="history-stat-num">${Math.round(volume)}</div>
+          <div class="history-stat-label">kg Vol</div>
+        </div>
+        <div class="history-stat">
+          <div class="history-stat-num">${durMin}</div>
+          <div class="history-stat-label">Min</div>
+        </div>
+      </div>
+      ${s.exercises.length > 0 ? `
+      <div class="history-exercises">
+        ${s.exercises.slice(0,5).map(e => {
+          const doneSets = e.sets.filter(x=>x.done);
+          return `<div class="history-ex-row">
+            <span>${e.icon || '💪'} ${e.name}</span>
+            <span>${doneSets.length}/${e.sets.length} sets</span>
+          </div>`;
+        }).join('')}
+        ${s.exercises.length > 5 ? `<div style="font-size:12px;color:var(--text3);margin-top:4px;">+${s.exercises.length - 5} more</div>` : ''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function deleteSession(idx) {
+  if (!confirm('Delete this session?')) return;
+  db.sessions.splice(idx, 1);
+  saveDB();
+  renderHistory();
+  renderHome();
+}
+
+// ════════════════════════════════════════
+// MODALS
+// ════════════════════════════════════════
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOnBg(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+
+renderHome();
+
+// Register SW
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// Manage FAB visibility on view change
+const originalGoTo = goTo;
+</script>
+</body>
+</html>
